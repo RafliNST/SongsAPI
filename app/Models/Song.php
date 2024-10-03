@@ -39,9 +39,4 @@ class Song extends Model
             'artist_id'
         );
     }
-
-    // public function artist() : BelongsTo
-    // {
-    //     return $this->belongsTo(Artist::class);
-    // }
 }
