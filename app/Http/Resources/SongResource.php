@@ -20,7 +20,6 @@ class SongResource extends JsonResource
             'released_date' => $this->released_date,
             'cover' => $this->cover,
             'album' => new AlbumResource($this->album),
-            // 'artist' => $this->artists,
             'artists' => ArtistResource::collection($this->artists)
         ];
     }

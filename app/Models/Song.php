@@ -16,9 +16,8 @@ class Song extends Model
     public $incrementing = true;
     public $timestamps = true;
     protected $fillable = [
-        'artist_id',
-        'name',
-        'release_date',
+        'title',
+        'released_date',
         'cover',
         'album_id'
     ];
