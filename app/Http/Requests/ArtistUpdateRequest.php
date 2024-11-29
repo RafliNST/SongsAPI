@@ -7,7 +7,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Exceptions\HttpResponseException;
 
-class SongUpdateRequest extends FormRequest
+class ArtistUpdateRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,18 +25,16 @@ class SongUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => ['required', 'max:100'],
-            'cover' => ['nullable', 'max:100'],
-            'released_date' => ['required', 'max:100'],
-            'album_id' => ['required', 'max:10'],
-            'artists' => ['required', 'array', 'min:1']
+            'name' => ['required', 'max:100'],
+            'cover' => ['required', 'max:255'],
+            'debut' => ['required', 'max:4']
         ];
     }
 
     public function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response([
-            "errors" => $validator->getMessageBag()
+            'errors' =>  $validator->getMessageBag()
         ], 400));
     }
 }

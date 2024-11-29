@@ -14,8 +14,7 @@ class SongCreateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        // return Auth::user() != null;
-        return true;
+        return Auth::user() != null;
     }
 
     /**
@@ -28,9 +27,9 @@ class SongCreateRequest extends FormRequest
         return [
             'title' => ['required', 'max:100'],
             'cover' => ['nullable', 'max:100'],
-            'released_date' => ['required', 'max:100'],
+            'released_date' => ['required', 'date', 'date_format:Y-m-d'],
             'album_id' => ['nullable', 'max:10'],
-            'artists' => ['required']
+            'artists' => ['required', 'array', 'min:1']
         ];
     }
 

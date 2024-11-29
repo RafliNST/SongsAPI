@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Http\Resources\ArtistCollection;
 use Tests\TestCase;
 use App\Models\Song;
 use App\Models\Album;
@@ -49,6 +50,63 @@ class SongTest extends TestCase
             ]);
     }
 
+    public function testCreateArtistNotFound()
+    {
+        $this->seed([UserSeeder::class, ArtistRelationshipSeeder::class]);
+        $album = Album::query()->limit(1)->first();
+        $artists = Artist::query()->limit(1)->first();
+
+        $this->post('/api/songs', [
+            'title' => 'ただ君に晴れ',
+            'released_date' => '2018-05-05',
+            'album_id' => $album->id,
+            'artists' => [
+                $artists->id + 10
+            ]
+        ], [
+            'Authorization' => 'token'
+        ])->assertStatus(404)
+            ->assertJson([
+                'errors' => [
+                    'message' => ['not found'],                    
+                ]
+            ]);
+    }
+
+    public function testCreateNullAlbumSuccess()
+    {
+        $this->seed([UserSeeder::class, ArtistRelationshipSeeder::class]);
+        $album = Album::query()->limit(1)->first();
+        $artists = Artist::query()->limit(1)->first();
+
+        $this->post('/api/songs', [
+            'title' => 'ただ君に晴れ',
+            'released_date' => '2018-05-05',
+            // 'album_id' => $album->id + 10,
+            'artists' => [
+                $artists->id
+            ]
+        ], [
+            'Authorization' => 'token'
+        ])->assertStatus(201)
+            ->assertJson([
+                'data' => [
+                    'title' => 'ただ君に晴れ',
+                    'released_date' => '2018-05-05',
+                    'cover' => null,
+                    'album' => null,
+                    'artists' => [
+                        [
+                            'id' => $artists->id,
+                            'name' => $artists->name,
+                            'cover' => $artists->cover,
+                            'debut' => $artists->debut
+                        ]
+                    ]
+                ]
+            ]);
+    }
+
     public function testUpdateSuccess()
     {
         $this->seed([UserSeeder::class, ArtistRelationshipSeeder::class]);
@@ -56,15 +114,12 @@ class SongTest extends TestCase
         $artist = Artist::query()->limit(1)->first();
         $album = Album::where('id', $song->album_id+1)->first();
 
-
-
         $this->put('/api/songs/' . $song->id, [
             'title' => '爆弾魔',
             'released_date' => '2018-05-05',
             'album_id' => $album->id,
             'artists' => [
                 $artist->id,
-                // $artist->id+2
             ]
         ], [
             'Authorization' => 'token'
@@ -87,6 +142,64 @@ class SongTest extends TestCase
                             'debut' => $artist->debut
                         ],
                     ]
+                ]
+            ]);
+    }
+
+    public function testUpdateArtistNotFound()
+    {
+        $this->seed([UserSeeder::class, ArtistRelationshipSeeder::class]);
+        $song = Song::query()->limit(1)->first();
+        $artist = Artist::query()->limit(1)->first();
+        $album = Album::where('id', $song->album_id+1)->first();
+
+        $this->put('/api/songs/' . $song->id, [
+            'title' => '爆弾魔',
+            'released_date' => '2018-05-05',
+            'album_id' => $album->id,
+            'artists' => [
+                $artist->id + 10,
+            ]
+        ], [
+            'Authorization' => 'token'
+        ])->assertStatus(404)
+            ->assertJson([
+                'errors' => [
+                    'message' => ['not found'],                    
+                ]
+            ]);
+    }
+
+    public function testDeleteSuccess()
+    {
+        $this->seed([UserSeeder::class, ArtistRelationshipSeeder::class]);
+        $song = Song::query()->limit(1)->first();
+
+        $this->delete('/api/songs/' . $song->id, [
+
+        ], [
+            'Authorization' => 'token'
+        ])->assertStatus(200)
+            ->assertJson([
+                'data' => [
+                    'success'
+                ]
+            ]);
+    }
+
+    public function testDeleteNotFound()
+    {
+        $this->seed([UserSeeder::class, ArtistRelationshipSeeder::class]);
+        $song = Song::query()->limit(1)->first();
+
+        $this->delete('/api/songs/' . $song->id + 10, [
+
+        ], [
+            'Authorization' => 'token'
+        ])->assertStatus(404)
+            ->assertJson([
+                'errors' => [
+                    'message' => ['not found']
                 ]
             ]);
     }

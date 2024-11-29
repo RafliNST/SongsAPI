@@ -2,29 +2,52 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\SongCreateRequest;
-use App\Http\Requests\SongUpdateRequest;
-use App\Http\Resources\SongResource;
-use App\Models\ArtistRelationship;
 use App\Models\Song;
+use App\Models\Album;
 use App\Models\Artist;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use App\Models\ArtistRelationship;
+use App\Http\Resources\SongResource;
 use App\Http\Resources\SongCollection;
+use App\Http\Requests\SongCreateRequest;
+use App\Http\Requests\SongUpdateRequest;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Http\Exceptions\HttpResponseException;
-use Illuminate\Http\JsonResponse;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class SongController extends Controller
 {
     public function create(SongCreateRequest $request) : JsonResponse
     {
         $data = $request->validated();
-        $song = new Song($data);        
+        $song = new Song($data);
+
+        $artistsId = $request->artists;
+
+        $artists = Artist::whereIn('id', $artistsId)->get();
+
+        if ($artists->isEmpty()) {
+            throw new HttpResponseException(response([
+                'errors' => [
+                    'message' => ['not found']
+                ]
+            ])->setStatusCode(404));
+        }
+
+        $albumId = $request->album_id;
+        $album = Album::where('id', $albumId)->first();
+
+        if (!$album && $albumId != null) {
+            throw new HttpResponseException(response([
+                'errors' => [
+                    'message' => ['not found']
+                ]
+            ])->setStatusCode(404));
+        }
         
         $song->save();
 
-        if ($song && $request->artists) {
+        if ($song && $artists) {
             $artists = $request->artists;
 
             foreach($artists as $artist) {
@@ -51,10 +74,23 @@ class SongController extends Controller
         }
 
         $data = $request->validated();
+
+        $artistsId = $request->artists;
+
+        $artists = Artist::whereIn('id', $artistsId)->get();
+
+        if ($artists->isEmpty()) {
+            throw new HttpResponseException(response([
+                'errors' => [
+                    'message' => ['not found']
+                ]
+            ])->setStatusCode(404));
+        }
+        
         $song->fill($data);
         $song->save();
 
-        if ($song && $request->artists) {
+        if ($song && $artists) {
             $artists = $request->artists;
 
             $oldArtistRelationships = ArtistRelationship::where('song_id', $song->id)->get();
@@ -92,9 +128,9 @@ class SongController extends Controller
         return $songs->setProperties("success get data", 200);
     }
 
-    public function delete(int $id) 
+    public function delete(int $id) : JsonResponse 
     {
-        $song = Song::where('id', $id)->first();
+        $song = Song::where('id', $id)->first();        
 
         if (!$song) {
             throw new HttpResponseException(response([
@@ -104,10 +140,15 @@ class SongController extends Controller
             ])->setStatusCode(404));
         }
 
+        $songRelationArtists = ArtistRelationship::where('song_id', $song->id)->get();
+        foreach($songRelationArtists as $songRelationArtist) {
+            $songRelationArtist->delete();
+        }
+
         $song->delete();
 
         return response()->json([
             'data' => true
-        ])->setStatusCode(400);
+        ])->setStatusCode(200);
     }
 }

@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('title')->nullable(false);
             $table->date('released_date')->nullable(false);
             $table->string('cover')->nullable();
-            $table->foreignId('album_id')->constrained('albums', 'id', 'song_album')->nullable();
+            $table->foreignId('album_id')->nullable()->constrained('albums', 'id', 'song_album');
             $table->timestamps();
         });
     }

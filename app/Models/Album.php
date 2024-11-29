@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Album extends Model
 {
@@ -14,9 +15,13 @@ class Album extends Model
     public $timestamps = true;
     protected $fillable = [
         'artist_id',
-        'name',
-        'release_date',
-        'cover'
+        'title',
+        'released_date',
+        'cover',
     ];
 
+    public function artist() : BelongsTo
+    {
+        return $this->belongsTo(Artist::class);
+    }
 }
