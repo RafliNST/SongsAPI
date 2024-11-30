@@ -38,7 +38,7 @@ class AlbumController extends Controller
         if(!$artist) {
             throw new HttpResponseException(response([
                 'errors' => [
-                    'message' => ['not found']
+                    'message' => ['artist not found']
                 ]
             ])->setStatusCode(404));
         }
@@ -62,6 +62,16 @@ class AlbumController extends Controller
         }
 
         $data = $request->validated();
+
+        $artist = Artist::where('id', $data['artist_id'])->first();
+        if(!$artist) {
+            throw new HttpResponseException(response([
+                'errors' => [
+                    'message' => ['artist not found']
+                ]
+            ])->setStatusCode(404));
+        }
+        
         $album->fill($data);
         $album->save();
 

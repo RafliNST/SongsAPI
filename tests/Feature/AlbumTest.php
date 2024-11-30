@@ -110,7 +110,7 @@ class AlbumTest extends TestCase
             ]);
     }
 
-    public function testUpdateNotFound()
+    public function testUpdateAlbumNotFound()
     {
         $this->seed([UserSeeder::class, ArtistRelationshipSeeder::class]);
         
@@ -132,6 +132,28 @@ class AlbumTest extends TestCase
             ]);
     }
 
+    public function testUpdateArtistNotFound()
+    {
+        $this->seed([UserSeeder::class, ArtistRelationshipSeeder::class]);
+        
+        $album = Album::query()->limit(1)->first();
+        $artist = Artist::query()->limit(1)->first();
+
+        $this->put('/api/albums/' . $album->id, [
+            'artist_id' => $artist->id + 10,
+            'title' => "負け犬にアンコールはいらない",
+            'released_date' => '2018-05-08',
+            'cover' => 'https://upload.wikimedia.org/wikipedia/en/4/4e/Yorushika_-_A_Loser_Doesn%27t_Need_an_Encore.png'
+        ], [
+            'Authorization' => 'token'
+        ])->assertStatus(404)
+            ->assertJson([
+                'errors' => [                    
+                    'message' => ['artist not found'],
+                ]
+            ]);
+    }
+
     public function testDeleteSuccess()
     {
         $this->seed([UserSeeder::class, AlbumSeeder::class]);
@@ -145,6 +167,24 @@ class AlbumTest extends TestCase
         ])->assertStatus(200)
             ->assertJson([
                 'data' => true
+            ]);
+    }
+
+    public function testDeleteNotFound()
+    {
+        $this->seed([UserSeeder::class, AlbumSeeder::class]);
+
+        $album = Album::query()->limit(1)->first();
+
+        $this->delete('/api/albums/' . $album->id + 10, [
+
+        ], [
+            'Authorization' => 'token'
+        ])->assertStatus(404)
+            ->assertJson([
+                'errors' => [
+                    'message' => ['not found']
+                ]
             ]);
     }
 }

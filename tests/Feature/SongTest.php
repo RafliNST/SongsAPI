@@ -68,7 +68,30 @@ class SongTest extends TestCase
         ])->assertStatus(404)
             ->assertJson([
                 'errors' => [
-                    'message' => ['not found'],                    
+                    'message' => ['artist(s) not found'],                    
+                ]
+            ]);
+    }
+
+    public function testCreateAlbumNotFound()
+    {
+        $this->seed([UserSeeder::class, ArtistRelationshipSeeder::class]);
+        $album = Album::query()->limit(1)->first();
+        $artists = Artist::query()->limit(1)->first();
+
+        $this->post('/api/songs', [
+            'title' => 'ただ君に晴れ',
+            'released_date' => '2018-05-05',
+            'album_id' => $album->id + 10,
+            'artists' => [
+                $artists->id
+            ]
+        ], [
+            'Authorization' => 'token'
+        ])->assertStatus(404)
+            ->assertJson([
+                'errors' => [
+                    'message' => ['album not found'],                    
                 ]
             ]);
     }
@@ -165,7 +188,31 @@ class SongTest extends TestCase
         ])->assertStatus(404)
             ->assertJson([
                 'errors' => [
-                    'message' => ['not found'],                    
+                    'message' => ['artist(s) not found'],                  
+                ]
+            ]);
+    }
+
+    public function testUpdateAlbumNotFound()
+    {
+        $this->seed([UserSeeder::class, ArtistRelationshipSeeder::class]);
+        $song = Song::query()->limit(1)->first();
+        $artist = Artist::query()->limit(1)->first();
+        $album = Album::where('id', $song->album_id+1)->first();
+
+        $this->put('/api/songs/' . $song->id, [
+            'title' => '爆弾魔',
+            'released_date' => '2018-05-05',
+            'album_id' => $album->id + 10,
+            'artists' => [
+                $artist->id,
+            ]
+        ], [
+            'Authorization' => 'token'
+        ])->assertStatus(404)
+            ->assertJson([
+                'errors' => [
+                    'message' => ['album not found'],                  
                 ]
             ]);
     }

@@ -29,7 +29,7 @@ class SongController extends Controller
         if ($artists->isEmpty()) {
             throw new HttpResponseException(response([
                 'errors' => [
-                    'message' => ['not found']
+                    'message' => ['artist(s) not found']
                 ]
             ])->setStatusCode(404));
         }
@@ -40,7 +40,7 @@ class SongController extends Controller
         if (!$album && $albumId != null) {
             throw new HttpResponseException(response([
                 'errors' => [
-                    'message' => ['not found']
+                    'message' => ['album not found']
                 ]
             ])->setStatusCode(404));
         }
@@ -82,7 +82,18 @@ class SongController extends Controller
         if ($artists->isEmpty()) {
             throw new HttpResponseException(response([
                 'errors' => [
-                    'message' => ['not found']
+                    'message' => ['artist(s) not found']
+                ]
+            ])->setStatusCode(404));
+        }
+
+        $albumId = $request->album_id;
+        $album = Album::where('id', $albumId)->first();
+
+        if (!$album && $albumId != null) {
+            throw new HttpResponseException(response([
+                'errors' => [
+                    'message' => ['album not found']
                 ]
             ])->setStatusCode(404));
         }

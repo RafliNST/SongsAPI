@@ -51,6 +51,43 @@ class ArtistTest extends TestCase
             ]);
     }
 
+    public function testUpdateNotFound()
+    {
+        $this->seed([UserSeeder::class, ArtistSeeder::class]);
+        $artist = Artist::query()->limit(1)->first();
+
+        $this->put('/api/artists/' . $artist->id + 10, [
+            'name' => 'ヨルシカ',
+            'debut' => '2017',
+            'cover' => 'https://upload.wikimedia.org/wikipedia/commons/2/27/Yorushika_Logo.jpg'
+        ], [
+            'Authorization' => 'token'
+        ])->assertStatus(404)
+            ->assertJson([
+                'errors' => [
+                    'message' => ['not found'],
+                ]
+            ]);
+    }
+
+    public function testUpdateFailed()
+    {
+        $this->seed([UserSeeder::class, ArtistSeeder::class]);
+        $artist = Artist::query()->limit(1)->first();
+
+        $this->put('/api/artists/' . $artist->id, [
+            'name' => 'ヨルシカ',
+            'cover' => 'https://upload.wikimedia.org/wikipedia/commons/2/27/Yorushika_Logo.jpg'
+        ], [
+            'Authorization' => 'token'
+        ])->assertStatus(400)
+            ->assertJson([
+                'errors' => [
+                    'debut' => ['The debut field is required.'],
+                ]
+            ]);
+    }
+
     public function testDeleteSuccess()
     {
         $this->seed([UserSeeder::class, ArtistSeeder::class]);
@@ -63,6 +100,23 @@ class ArtistTest extends TestCase
         ])->assertStatus(200)
             ->assertJson([
                 'data' => true
+            ]);
+    }
+
+    public function testDeleteFailed()
+    {
+        $this->seed([UserSeeder::class, ArtistSeeder::class]);
+        $artist = Artist::query()->limit(1)->first();
+
+        $this->delete('/api/artists/' . $artist->id + 10, [
+
+        ], [
+            'Authorization' => 'token'
+        ])->assertStatus(404)
+            ->assertJson([
+                'errors' => [
+                    'message' => ['not found']
+                ]
             ]);
     }
 }
