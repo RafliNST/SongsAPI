@@ -5,11 +5,11 @@ use App\Http\Controllers\ArtistController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SongController;
+use App\Http\Controllers\UserController;
 use App\Http\Middleware\ApiAuthMiddleware;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+Route::post('/users', [UserController::class, 'register']);
+Route::post('/users/login', [UserController::class, 'login']);
 
 Route::middleware(ApiAuthMiddleware::class)->group(function() {
     Route::post('/songs', [SongController::class, 'create']);
@@ -23,6 +23,10 @@ Route::middleware(ApiAuthMiddleware::class)->group(function() {
     Route::post('/albums', [AlbumController::class, 'create']);
     Route::put('/albums/{id}', [AlbumController::class, 'update']);
     Route::delete('/albums/{id}', [AlbumController::class, 'delete']);
+
+    Route::get('/users/current', [UserController::class, 'get']);
+    Route::patch('/users/current', [UserController::class, 'update']);
+    Route::delete('/users/logout', [UserController::class, 'logout']);
 });
 
 Route::get('/songs', [SongController::class, 'get']);

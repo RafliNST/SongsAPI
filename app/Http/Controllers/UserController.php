@@ -34,12 +34,18 @@ class UserController extends Controller
         return (new UserResource($user))->response()->setStatusCode(201);
     }
 
+    public function get(Request $request): UserResource
+    {
+        $user = Auth::user();
+        return new UserResource($user);
+    }
+
     public function login(UserLoginRequest $request)
     {
         $data = $request->validated();
 
         $user = User::where('username', $data['username'])->first();
-        if (!$user || Hash::check($data['password'], $user->password)) {
+        if (!$user || !Hash::check($data['password'], $user->password)) {
             throw new HttpResponseException(response([
                 'errors' => [
                     'message' => ['username or password wrong']
@@ -59,11 +65,11 @@ class UserController extends Controller
         $user = Auth::user();
         
         if (isset($data['name'])) {
-            $user->name = $data['name']);
+            $user->name = $data['name'];
         }
 
         if (isset($data['password'])) {
-            $user->password = Hash::make($data['password']));
+            $user->password = Hash::make($data['password']);
         }
 
         $user->save();
