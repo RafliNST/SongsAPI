@@ -16,8 +16,10 @@ class User extends Model implements Authenticatable
     protected $fillable = [
         'username',
         'password',
-        'name'
+        'name',
+        'role'
     ];
+    public const ROLE = ['listener', 'artist', 'admin'];
 
     /*
      *

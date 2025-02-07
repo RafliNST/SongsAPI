@@ -26,7 +26,7 @@ class SongTest extends TestCase
                 $artists->id
             ]
         ], [
-            'Authorization' => 'token'
+            'Authorization' => 'admin'
         ])->assertStatus(201)
             ->assertJson([
                 'data' => [
@@ -50,6 +50,29 @@ class SongTest extends TestCase
             ]);
     }
 
+    public function testNotAllowed()
+    {
+        $this->seed([UserSeeder::class, ArtistRelationshipSeeder::class]);
+        $album = Album::query()->limit(1)->first();
+        $artists = Artist::query()->limit(1)->first();
+
+        $this->post('/api/songs', [
+            'title' => 'ただ君に晴れ',
+            'released_date' => '2018-05-05',
+            'album_id' => $album->id,
+            'artists' => [
+                $artists->id
+            ]
+        ], [
+            'Authorization' => 'token'
+        ])->assertStatus(401)
+            ->assertJson([
+                'errors' => [
+                    'message' => ['not allowed'],                    
+                ]
+            ]);
+    }
+
     public function testCreateArtistNotFound()
     {
         $this->seed([UserSeeder::class, ArtistRelationshipSeeder::class]);
@@ -64,7 +87,7 @@ class SongTest extends TestCase
                 $artists->id + 10
             ]
         ], [
-            'Authorization' => 'token'
+            'Authorization' => 'admin'
         ])->assertStatus(404)
             ->assertJson([
                 'errors' => [
@@ -87,7 +110,7 @@ class SongTest extends TestCase
                 $artists->id
             ]
         ], [
-            'Authorization' => 'token'
+            'Authorization' => 'admin'
         ])->assertStatus(404)
             ->assertJson([
                 'errors' => [
@@ -110,7 +133,7 @@ class SongTest extends TestCase
                 $artists->id
             ]
         ], [
-            'Authorization' => 'token'
+            'Authorization' => 'admin'
         ])->assertStatus(201)
             ->assertJson([
                 'data' => [
@@ -145,7 +168,7 @@ class SongTest extends TestCase
                 $artist->id,
             ]
         ], [
-            'Authorization' => 'token'
+            'Authorization' => 'admin'
         ])->assertStatus(200)
             ->assertJson([
                 'data' => [
@@ -184,7 +207,7 @@ class SongTest extends TestCase
                 $artist->id + 10,
             ]
         ], [
-            'Authorization' => 'token'
+            'Authorization' => 'admin'
         ])->assertStatus(404)
             ->assertJson([
                 'errors' => [
@@ -208,7 +231,7 @@ class SongTest extends TestCase
                 $artist->id,
             ]
         ], [
-            'Authorization' => 'token'
+            'Authorization' => 'admin'
         ])->assertStatus(404)
             ->assertJson([
                 'errors' => [
@@ -225,7 +248,7 @@ class SongTest extends TestCase
         $this->delete('/api/songs/' . $song->id, [
 
         ], [
-            'Authorization' => 'token'
+            'Authorization' => 'admin'
         ])->assertStatus(200)
             ->assertJson([
                 'data' => [
@@ -242,7 +265,7 @@ class SongTest extends TestCase
         $this->delete('/api/songs/' . $song->id + 10, [
 
         ], [
-            'Authorization' => 'token'
+            'Authorization' => 'admin'
         ])->assertStatus(404)
             ->assertJson([
                 'errors' => [

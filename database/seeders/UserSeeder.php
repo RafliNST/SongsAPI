@@ -18,7 +18,16 @@ class UserSeeder extends Seeder
             'username' => 'RANst',
             'password' => Hash::make('rahasia'),
             'name' => 'Rafli A.N',
+            'role' => 'listener',
             'token' => 'token'
         ]);
+
+        User::create([
+            'username' => 'admin',
+            'password' => Hash::make('admin'),
+            'name' => 'admin',
+            'role' => 'admin',
+            'token' => 'admin'
+        ]);        
     }
 }
